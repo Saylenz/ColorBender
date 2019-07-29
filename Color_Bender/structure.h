@@ -11,6 +11,8 @@ public:
     void collision(Hero &hero);
     void Stick(Hero &hero);
     void ColorGate(Hero &hero);
+    void Spike(Hero &hero);
+    void LoadColor(Hero &hero);
     sf::Vector2f size;
     sf::Vector2f pos;
 private:

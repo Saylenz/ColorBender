@@ -5,25 +5,13 @@
 #include <vector>
 #include <cmath>
 #include <cstdlib>
+#include <fstream>
+#include <regex>
+#include <string>
 
 #include "menu.h"
 #include "hero.h"
 #include "structure.h"
-
-void Bounds(Hero &hero){
-    if(hero.getPosition().x<0){
-        hero.setPosition(0,hero.getPosition().y);
-    }
-    if(hero.getPosition().x + hero.getGlobalBounds().width>1024){
-        hero.setPosition(1024-hero.getGlobalBounds().width, hero.getPosition().y);
-    }
-    if(hero.getPosition().y<0){
-        hero.setPosition(hero.getPosition().x, 0);
-    }
-    if(hero.getPosition().y + hero.getGlobalBounds().height>768){
-       hero.setPosition(hero.getPosition().x, 768-hero.getGlobalBounds().height);
-    }
-}
 
 void SetMenu(sf::Event &event, Menu &menu, sf::Window &window, bool &StartGame){
     switch (event.type) {
@@ -61,137 +49,193 @@ void SetMenu(sf::Event &event, Menu &menu, sf::Window &window, bool &StartGame){
 }
 }
 
-int main() {
-   // create the window
-   sf::RenderWindow window(sf::VideoMode(1200, 800), "My window");
+void LoadTexture(sf::Texture &texture ,std::string &image, std::vector<Structure> &structure){
+    for (int i=0;i<structure.size();i++) { 
+        texture.loadFromFile(image);
+        if (!texture.loadFromFile(image)) {
+            std::cerr << "Could not load texture" << std::endl;
+        }
+        texture.setRepeated(true);
+        structure[i].setTexture(texture);
+    }
+}
 
+void LoadMap(std::vector<Structure> &Walls,std::vector<Structure> &StickyWalls, std::vector<Structure> &Gates,
+             std::vector<Structure> &Spikes, std::vector<Structure> &Beacons){
+    std::string linia;
+
+    std::string structure_type;
+    int a,b,c,d,e,f,g;
+
+
+    std::fstream plik("level1.txt", std::ios::in);
+        if (!plik.is_open()) {
+            std::cout << "Blad" << std::endl;
+        }
+
+        std::smatch matches;
+        while (getline(plik, linia)) {
+
+
+            std::regex wzorzec("([a-z]);([0-9]+);([0-9]+);([0-9]+);([0-9]+);([0-9]+);([0-9]+);([0-9]+)");
+
+            if (regex_search(linia, matches, wzorzec)) {
+                std::cout << "Znaleziono: " << matches.size() << " dopasowania" << std::endl;
+                for (int i = 0; i < (int)matches.size(); i++) {
+                    std::string linia1;
+                    structure_type = matches[1];
+                    linia1 = matches[2];
+                    a = atoi(linia1.c_str());
+                    linia1 = matches[3];
+                    b = atoi(linia1.c_str());
+                    linia1 = matches[4];
+                    c = atoi(linia1.c_str());
+                    linia1 = matches[5];
+                    d = atoi(linia1.c_str());
+                    linia1 = matches[6];
+                    e = atoi(linia1.c_str());
+                    linia1 = matches[7];
+                    f = atoi(linia1.c_str());
+                    linia1 = matches[8];
+                    g = atoi(linia1.c_str());
+
+                    if(structure_type=="w"){
+                        Walls.emplace_back(Structure(sf::Vector2f(a,b), sf::Vector2f(c,d), sf::Color(e,f,g)));
+                    }
+                    else if(structure_type=="s"){
+                        StickyWalls.emplace_back(Structure(sf::Vector2f(a,b), sf::Vector2f(c,d), sf::Color(e,f,g)));
+                    }
+                    else if(structure_type=="g"){
+                        Gates.emplace_back(Structure(sf::Vector2f(38,b), sf::Vector2f(c,d), sf::Color(e,f,g)));
+                    }
+                    else if(structure_type=="k"){
+                        Spikes.emplace_back(Structure(sf::Vector2f(a,b), sf::Vector2f(c, d), sf::Color(255,255,255)));
+                    }
+                    else if(structure_type=="b"){
+                        Beacons.emplace_back(Structure(sf::Vector2f(90,101), sf::Vector2f(c, d), sf::Color(255,255,255)));
+                    }
+                    linia = matches.suffix().str();
+                }
+
+            }
+        }
+        plik.close();
+}
+
+int main() {
+    unsigned int window_width = 1200, window_height = 800;
+   // create the window
+   sf::RenderWindow window(sf::VideoMode(window_width, window_height), "My window");
    Menu menu(window.getSize().x,window.getSize().y);
    //Ladowanie tekstur
-   std::vector<sf::Sprite> Figures;
-
-   //Background
-   /*sf::Texture grass;
-   grass.loadFromFile("grass.png");
-   if (!grass.loadFromFile("grass.png")) {
-       std::cerr << "Could not load texture" << std::endl;
-       return 1;
-   }
-   sf::Sprite sprite;
-   sprite.setTexture(grass);
-   grass.setRepeated(true);
-   sprite.setTextureRect(sf::IntRect(0,0,1024, 768));
-   Figures.emplace_back(sprite);*/
 
    //Hero
-   sf::Texture guy;
-   guy.loadFromFile("guy.png");
-   if (!guy.loadFromFile("guy.png")) {
+   sf::Texture herotexture;
+   herotexture.loadFromFile("hero.png");
+   if (!herotexture.loadFromFile("hero.png")) {
        std::cerr << "Could not load texture" << std::endl;
        return 1;
    }
-   Hero hero;
-   sf::Color hColor = sf::Color::White;
+   sf::Vector2f beg_pos(50,400);
+   Hero hero(beg_pos);
+   hero.set_stick(0);
+   sf::Color hColor = sf::Color::Yellow;
    hero.setHeroColor(hColor);
-   hero.setPosition(50,400);
-   hero.setTexture(guy);
-   hero.setTextureRect(sf::IntRect(0,0,40,70));
+   hero.setPosition(beg_pos);
+   hero.setTexture(herotexture);
+   hero.setTextureRect(sf::IntRect(0,0,56,54));
+   //Hero
 
    std::vector<Structure> Walls;
    std::vector<Structure> StickyWalls;
    std::vector<Structure> Gates;
+   std::vector<Structure> Spikes;
+   std::vector<Structure> Beacons;
 
-   //Walls {size, position, color}
+   LoadMap(Walls,StickyWalls,Gates, Spikes, Beacons);
 
-   Walls.emplace_back(Structure(sf::Vector2f(1200,25), sf::Vector2f(0, 775), sf::Color::White)); //1
-   Walls.emplace_back(Structure(sf::Vector2f(25,200), sf::Vector2f(300,575), sf::Color::Yellow)); //2
-   Walls.emplace_back(Structure(sf::Vector2f(25,500), sf::Vector2f(500,425), sf::Color::White)); //3
-
-   //Sticky Walls
-   StickyWalls.emplace_back(Structure(sf::Vector2f(25,200), sf::Vector2f(500,500), sf::Color::Red)); //1
-   StickyWalls.emplace_back(Structure(sf::Vector2f(25,25), sf::Vector2f(120,500), sf::Color::Red)); //2
-
-   //Gates
-   Gates.emplace_back(Structure(sf::Vector2f(10,125), sf::Vector2f(300,625), sf::Color::Red)); //7
-   Gates.emplace_back(Structure(sf::Vector2f(100,10), sf::Vector2f(275,300), sf::Color::Red)); //7
 
    sf::Texture wall;
-   for (int i=0;i<Walls.size();i++) {
+   std::string texture = "wall.png";
+   LoadTexture(wall,texture,Walls);
 
-       wall.loadFromFile("wall.png");
-       if (!wall.loadFromFile("wall.png")) {
-           std::cerr << "Could not load texture" << std::endl;
-           return 1;
-       }
-       wall.setRepeated(true);
-       Walls[i].setTexture(wall);
-   }
-   for (int i=0;i<StickyWalls.size();i++) {
+   sf::Texture stickywall;
+   std::string texture2 = "wall2.png";
+   LoadTexture(stickywall,texture2,StickyWalls);
 
-       wall.loadFromFile("wall.png");
-       if (!wall.loadFromFile("wall.png")) {
-           std::cerr << "Could not load texture" << std::endl;
-           return 1;
-       }
-       wall.setRepeated(true);
-       StickyWalls[i].setTexture(wall);
-   }
-   for (int i=0;i<Gates.size();i++) {
-       sf::Texture wall;
-       wall.loadFromFile("wall.png");
-       if (!wall.loadFromFile("wall.png")) {
-           std::cerr << "Could not load texture" << std::endl;
-           return 1;
-       }
-       wall.setRepeated(true);
-       Gates[i].setTexture(wall);
-   }
+   sf::Texture gate;
+   std::string texture3 = "gatetexture.png";
+   LoadTexture(gate,texture3,Gates);
+
+   sf::Texture spike;
+   std::string texture4 = "spike.png";
+   LoadTexture(spike,texture4,Spikes);
+
+   sf::Texture beacon;
+   std::string texture5 = "beacon.png";
+   LoadTexture(beacon,texture5,Beacons);
    //Ladowanie tekstur
 
    sf::Clock clock;
 
    while (window.isOpen()) {
-       window.setFramerateLimit(120);
-
-       bool StartGame;
+       window.setFramerateLimit(200);
+       bool StartGame=1;
 
        sf::Event event;
        while (window.pollEvent(event)) {
 
        //Menu
-       SetMenu(event,menu,window,StartGame);
+           if(StartGame!=1){
+                SetMenu(event,menu,window,StartGame);
+           }
        //Menu
+
            if (event.type == sf::Event::Closed)
                window.close();
        }
+
        //Gameplay
-       if(StartGame==0){
+       if(StartGame!=1){
             menu.draw(window);
             std::cout << "StartGame: " << StartGame << std::endl;
        }
        else{
            float delta_t = float(clock.getElapsedTime().asSeconds());
-           //cout << time1.asSeconds() << endl;
            clock.restart();
 
+       for (int i=0;i<StickyWalls.size();i++) {
+           StickyWalls[i].Stick(hero);
+           StickyWalls[i].collision(hero);
+           std::cout << i << "structure: " << hero.stick() << std::endl;
+       }
        for (int i=0;i<Walls.size();i++) {
            Walls[i].collision(hero);
        }
-       for (int i=0;i<StickyWalls.size();i++) {
-           StickyWalls[i].collision(hero);
-           StickyWalls[i].Stick(hero);
-       }
+
        for (int i=0;i<Gates.size();i++) {
-             Gates[i].ColorGate(hero);
+           Gates[i].ColorGate(hero);
+       }
+       for (int i=0;i<Spikes.size();i++) {
+           Spikes[i].Spike(hero);
+       }
+       for (int i=0;i<Spikes.size();i++) {
+           Spikes[i].Spike(hero);
+       }
+       for (int i=0;i<Beacons.size();i++) {
+           Beacons[i].LoadColor(hero);
        }
 
        hero.step(delta_t);
-       Bounds(hero);
+       hero.Bounds(window_width, window_height);
 
        std::cout << "Skok: " << hero.ground() << std::endl;
-
+       std::cout << "Stick: " << hero.stick() << std::endl;
+       std::cout << "Walls vector size: " << Walls.size() << std::endl;
+       //std::cout << "Znaleziono: " << matches.size() << " dopasowania" << std::endl;
        std::system("cls");
 
-       window.clear(sf::Color::Black);
+       window.clear(sf::Color(95,95,95));
 
        for(int i=0;i<Walls.size();i++){
            window.draw(Walls[i]);
@@ -202,6 +246,10 @@ int main() {
        for(int i=0;i<Gates.size();i++){
            window.draw(Gates[i]);
        }
+       for(int i=0;i<Spikes.size();i++){
+           window.draw(Spikes[i]);
+       }
+
 
        window.draw(hero);
        }
