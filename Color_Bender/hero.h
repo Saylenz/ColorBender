@@ -3,7 +3,9 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 
-#define gravity 900
+#define gravity 800
+#define window_width 1200
+#define window_height 800
 
 class Hero : public sf::Sprite
 {
@@ -24,6 +26,7 @@ public:
 
     sf::Color color_;
     sf::Vector2f beg_pos_;
+    std::vector<bool> v_stick;
 
     void step(float &delta_t);
     void setHeroColor(sf::Color &color);
@@ -31,7 +34,8 @@ public:
 
 private:
    bool ground_;
-   bool stick_;
+   bool stick_=1;
+
 
    float vel_x = 0.0;
    float vel_y = 0.0;

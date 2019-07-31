@@ -52,16 +52,16 @@ Hero::Hero(sf::Vector2f &beg_pos){
                 set_acc_y(gravity);
                 this->move(vel_x*delta_t, 0);
         }
-        else if((sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) && (ground_==1) && (stick_==0)){
+        else if((sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) && (ground_==1) && (this->LockLeft==0 || this->LockRight==0)){
             vel_y = -400.0;
             set_acc_y(gravity);
             set_ground(false);
         }
-        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::W) && (stick_==1)){
+        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::W) && (this->LockLeft==1 || this->LockRight==1)){
                 vel_y=-100.0;
                 this->move(0,vel_y*delta_t);
         }
-        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::S) && (stick_==1)){
+        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::S) && (this->LockLeft==1 || this->LockRight==1)){
                 vel_y=100.0;
                 this->move(0,vel_y*delta_t);
         }
@@ -71,6 +71,7 @@ Hero::Hero(sf::Vector2f &beg_pos){
         }
         this->move(vel_x*delta_t, vel_y*delta_t);
     }
+
     void Hero::setHeroColor(sf::Color &color){
         this->setColor(color);
         color_=color;

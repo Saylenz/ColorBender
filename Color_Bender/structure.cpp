@@ -19,10 +19,10 @@ void Structure::collision(Hero &hero){
     float sDownside = this->getPosition().y + this->getGlobalBounds().height;
 
     int position;
-    if(hDownside < sTopside+10)    {position=1;}
-    if(hLeftside > sRightside-5)  {position=2;}
-    if(hTopside > sDownside-10)    {position=3;}
-    if(hRightside < sLeftside+5)  {position=4;}
+    if(hDownside < sTopside+15)    {position=1;}
+    if(hLeftside > sRightside-8)  {position=2;}
+    if(hTopside > sDownside-15)    {position=3;}
+    if(hRightside < sLeftside+8)  {position=4;}
 
     if(hero.getGlobalBounds().intersects(this->getGlobalBounds())){
 switch(position){
@@ -67,11 +67,11 @@ void Structure::Stick(Hero &hero){
         if(hDownside < sTopside || hTopside > sDownside){
             Contains_Horizontal=0;
         }
-        else if(sLeftside -2 <= hRightside && sLeftside + 5 >= hRightside){
+        else if(sLeftside -1 <= hRightside && sLeftside + 1 >= hRightside){
             Sticks_Right=1;
             hero.LockRight=1;
         }
-        else if(sRightside -5 <= hLeftside && sRightside +2 >= hLeftside){
+        else if(sRightside -1 <= hLeftside && sRightside +1 >= hLeftside){
             Sticks_Left=1;
             hero.LockLeft=1;
         }
@@ -85,11 +85,12 @@ void Structure::Stick(Hero &hero){
             hero.set_vel_x(0.0);
             hero.set_acc_y(0.0);
             hero.set_ground(true);
-            hero.set_stick(true);
+            //hero.set_stick(true);
         }
         else{
-            hero.set_stick(false);
-            hero.set_acc_y(800.0);
+            //hero.set_stick(false);
+            //hero.set_acc_y(800.0);
+            //hero.set_ground(false);
         }
     }
 }
@@ -100,16 +101,35 @@ void Structure::ColorGate(Hero &hero){
     }
 }
 
-void Structure::Spike(Hero &hero){
+void Structure::Spike(Hero &hero, Structure &beacon){
     if(hero.getGlobalBounds().intersects(this->getGlobalBounds())){
+        sf::Color color = sf::Color::White;
         hero.setPosition(hero.beg_pos_);
+        hero.setHeroColor(color);
+        beacon.setColor(color);
+        beacon.Beacon_active=0;
     }
 }
 
 void Structure::LoadColor(Hero &hero){
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::E) && hero.getGlobalBounds().intersects(this->getGlobalBounds())){
+        BeaconColor = hero.color_;
         this->setColor(hero.color_);
-        hero.setColor(sf::Color(255,255,255));
+        this->Beacon_active=1;
 }
+}
+void Structure::ActivePlatform(Structure &beacon ){
+    if(beacon.Beacon_active==1){
+        this->setColor(beacon.BeaconColor);
+    }
+    else{
+        this->setColor(sf::Color::White);
+    }
+
+}
+void Structure::Finish(Hero &hero, int &Level){
+    if(hero.getGlobalBounds().intersects(this->getGlobalBounds())){
+        Level++;
+    }
 }
 
