@@ -1,4 +1,4 @@
-#include <SFML/Window.hpp>
+  #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <memory>
@@ -221,7 +221,7 @@ int main() {
        std::cerr << "Could not load texture" << std::endl;
        return 1;
    }
-   sf::Vector2f beg_pos(1100,600);
+   sf::Vector2f beg_pos(600,50);
    Hero hero(beg_pos);
    sf::Color hColor = sf::Color::Yellow;
    hero.setHeroColor(hColor);

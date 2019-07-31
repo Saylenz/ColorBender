@@ -34,7 +34,7 @@ public:
 
 private:
    bool ground_;
-   bool stick_=1;
+   bool stick_;
 
 
    float vel_x = 0.0;

@@ -80,7 +80,7 @@ void Structure::Stick(Hero &hero){
             hero.LockLeft=0;
         }
 
-        if(Contains_Horizontal==1 && (Sticks_Left==1 || Sticks_Right==1)){
+        if(Contains_Horizontal==1 && (hero.LockLeft==1 || hero.LockRight==1)){
             hero.set_vel_y(0.0);
             hero.set_vel_x(0.0);
             hero.set_acc_y(0.0);
@@ -89,7 +89,7 @@ void Structure::Stick(Hero &hero){
         }
         else{
             //hero.set_stick(false);
-            //hero.set_acc_y(800.0);
+            hero.set_acc_y(800.0);
             //hero.set_ground(false);
         }
     }
