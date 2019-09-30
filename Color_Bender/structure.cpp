@@ -20,9 +20,9 @@ void Structure::collision(Hero &hero){
 
     int position;
     if(hDownside < sTopside+15)    {position=1;}
-    if(hLeftside > sRightside-8)  {position=2;}
+    if(hLeftside > sRightside-10)  {position=2;}
     if(hTopside > sDownside-15)    {position=3;}
-    if(hRightside < sLeftside+8)  {position=4;}
+    if(hRightside < sLeftside+10)  {position=4;}
 
     if(hero.getGlobalBounds().intersects(this->getGlobalBounds())){
 switch(position){
